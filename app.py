@@ -3,15 +3,8 @@ import os
 
 app = Flask(__name__)
 
-def get_env():
-    if os.path.exists(".env"):
-        with open(".env") as f:
-            for line in f:
-                if line.startswith("ENV="):
-                    return line.strip().split("=")[1]
-    return "UNKNOWN"
-
-ENV = get_env()
+# Read environment from system variable (BEST PRACTICE)
+ENV = os.getenv("ENV", "UNKNOWN")
 
 @app.route('/')
 def home():
@@ -21,7 +14,7 @@ def home():
 def health():
     return {
         "status": "UP",
-        "env": ENV
+        "environment": ENV
     }
 
 if __name__ == '__main__':
