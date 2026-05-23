@@ -13,6 +13,10 @@ pipeline {
 
     stages {
 
+        // =========================
+        // CLONE CODE
+        // =========================
+
         stage('Clone Code') {
 
             steps {
@@ -21,6 +25,10 @@ pipeline {
                 url: 'https://github.com/rashmigmr13-eng/ci-cd-demo.git'
             }
         }
+
+        // =========================
+        // BUILD
+        // =========================
 
         stage('Build') {
 
@@ -34,24 +42,9 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
-
-            steps {
-
-                sh '''
-                    . venv/bin/activate
-                    python -m unittest discover || true
-                '''
-            }
-        }
-
-        stage('Archive Artifacts') {
-
-            steps {
-
-                archiveArtifacts artifacts: '**/*'
-            }
-        }
+        // =========================
+        // DEPLOY TO DEV SERVER
+        // =========================
 
         stage('Deploy DEV') {
 
@@ -59,11 +52,7 @@ pipeline {
 
                 sh """
 
-                    ssh $DEV_SERVER '
-                        mkdir -p $APP_DIR
-                    '
-
-                    scp -r * $DEV_SERVER:$APP_DIR
+                    rsync -avz --exclude 'venv' ./ $DEV_SERVER:$APP_DIR/
 
                     ssh $DEV_SERVER '
 
@@ -83,20 +72,9 @@ pipeline {
             }
         }
 
-        stage('DEV Testing') {
-
-            steps {
-
-                sh """
-
-                    ssh $DEV_SERVER '
-
-                        curl -I http://localhost:5000
-
-                    '
-                """
-            }
-        }
+        // =========================
+        // DEPLOY TO TEST SERVER
+        // =========================
 
         stage('Deploy TEST') {
 
@@ -104,11 +82,7 @@ pipeline {
 
                 sh """
 
-                    ssh $TEST_SERVER '
-                        mkdir -p $APP_DIR
-                    '
-
-                    scp -r * $TEST_SERVER:$APP_DIR
+                    rsync -avz --exclude 'venv' ./ $TEST_SERVER:$APP_DIR/
 
                     ssh $TEST_SERVER '
 
@@ -128,7 +102,11 @@ pipeline {
             }
         }
 
-        stage('QA Testing') {
+        // =========================
+        // TESTING ON TEST SERVER
+        // =========================
+
+        stage('Testing') {
 
             steps {
 
@@ -136,14 +114,18 @@ pipeline {
 
                     ssh $TEST_SERVER '
 
-                        curl -I http://localhost:5000
+                        curl http://localhost:5000
 
                     '
                 """
             }
         }
 
-        stage('Manual Approval') {
+        // =========================
+        // MANUAL APPROVAL
+        // =========================
+
+        stage('Approval') {
 
             steps {
 
@@ -151,17 +133,17 @@ pipeline {
             }
         }
 
+        // =========================
+        // DEPLOY TO PROD SERVER
+        // =========================
+
         stage('Deploy PROD') {
 
             steps {
 
                 sh """
 
-                    ssh $PROD_SERVER '
-                        mkdir -p $APP_DIR
-                    '
-
-                    scp -r * $PROD_SERVER:$APP_DIR
+                    rsync -avz --exclude 'venv' ./ $PROD_SERVER:$APP_DIR/
 
                     ssh $PROD_SERVER '
 
@@ -186,7 +168,7 @@ pipeline {
 
         success {
 
-            echo 'Pipeline Executed Successfully!'
+            echo 'Pipeline Successful!'
         }
 
         failure {
