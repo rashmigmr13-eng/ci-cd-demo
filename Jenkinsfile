@@ -35,83 +35,83 @@ pipeline {
                 -e "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no" \
                 --exclude venv ./ ${DEV_SERVER}:/home/ubuntu/app/
 
-                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${DEV_SERVER} '
-                    mkdir -p /home/ubuntu/app
-                    cd /home/ubuntu/app
+                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${DEV_SERVER} << 'EOF'
+                mkdir -p /home/ubuntu/app
+                cd /home/ubuntu/app
 
-                    pkill -f app.py || true
+                pkill -f app.py || true
 
-                    python3 -m venv venv
-                    . venv/bin/activate
+                python3 -m venv venv
+                . venv/bin/activate
 
-                    pip install -r requirements.txt
+                pip install -r requirements.txt
 
-                    nohup python3 app.py > app.log 2>&1 &
+                nohup python3 app.py > app.log 2>&1 &
 
-                    sleep 5
+                sleep 5
 
-                    ps -ef | grep app.py
-                '
+                ps -ef | grep app.py
+EOF
                 """
             }
         }
 
         stage('Deploy TEST') {
             steps {
-                input message: "Approve deployment to TEST?"
+                input message: 'Approve deployment to TEST?'
 
                 sh """
                 rsync -avz \
                 -e "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no" \
                 --exclude venv ./ ${TEST_SERVER}:/home/ubuntu/app/
 
-                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${TEST_SERVER} '
-                    mkdir -p /home/ubuntu/app
-                    cd /home/ubuntu/app
+                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${TEST_SERVER} << 'EOF'
+                mkdir -p /home/ubuntu/app
+                cd /home/ubuntu/app
 
-                    pkill -f app.py || true
+                pkill -f app.py || true
 
-                    python3 -m venv venv
-                    . venv/bin/activate
+                python3 -m venv venv
+                . venv/bin/activate
 
-                    pip install -r requirements.txt
+                pip install -r requirements.txt
 
-                    nohup python3 app.py > app.log 2>&1 &
+                nohup python3 app.py > app.log 2>&1 &
 
-                    sleep 5
+                sleep 5
 
-                    ps -ef | grep app.py
-                '
+                ps -ef | grep app.py
+EOF
                 """
             }
         }
 
         stage('Deploy PROD') {
             steps {
-                input message: "Approve deployment to PROD?"
+                input message: 'Approve deployment to PROD?'
 
                 sh """
                 rsync -avz \
                 -e "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no" \
                 --exclude venv ./ ${PROD_SERVER}:/home/ubuntu/app/
 
-                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${PROD_SERVER} '
-                    mkdir -p /home/ubuntu/app
-                    cd /home/ubuntu/app
+                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${PROD_SERVER} << 'EOF'
+                mkdir -p /home/ubuntu/app
+                cd /home/ubuntu/app
 
-                    pkill -f app.py || true
+                pkill -f app.py || true
 
-                    python3 -m venv venv
-                    . venv/bin/activate
+                python3 -m venv venv
+                . venv/bin/activate
 
-                    pip install -r requirements.txt
+                pip install -r requirements.txt
 
-                    nohup python3 app.py > app.log 2>&1 &
+                nohup python3 app.py > app.log 2>&1 &
 
-                    sleep 5
+                sleep 5
 
-                    ps -ef | grep app.py
-                '
+                ps -ef | grep app.py
+EOF
                 """
             }
         }
@@ -119,11 +119,11 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline SUCCESS ✅"
+            echo 'Pipeline SUCCESS ✅'
         }
 
         failure {
-            echo "Pipeline FAILED ❌"
+            echo 'Pipeline FAILED ❌'
         }
     }
 }
