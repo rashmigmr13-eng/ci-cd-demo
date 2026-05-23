@@ -7,11 +7,12 @@ pipeline {
         PROD_SERVER = "ubuntu@13.212.104.46"
 
         APP_DIR = "/home/ubuntu/app"
-        SSH_KEY = "/root/.ssh/id_ed25519"
+        SSH_KEY = "/var/lib/jenkins/.ssh/id_ed25519"
     }
 
     stages {
 
+        // ===================== CHECKOUT =====================
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -19,6 +20,7 @@ pipeline {
             }
         }
 
+        // ===================== BUILD =====================
         stage('Build') {
             steps {
                 sh '''
@@ -29,7 +31,7 @@ pipeline {
             }
         }
 
-        // ================= DEV =================
+        // ===================== DEPLOY DEV =====================
         stage('Deploy DEV') {
             steps {
                 sh """
@@ -48,7 +50,7 @@ pipeline {
             }
         }
 
-        // ================= TEST =================
+        // ===================== DEPLOY TEST =====================
         stage('Deploy TEST') {
             steps {
                 sh """
@@ -67,24 +69,25 @@ pipeline {
             }
         }
 
+        // ===================== TESTING =====================
         stage('Testing') {
             steps {
                 sh """
                     ssh -i $SSH_KEY -o StrictHostKeyChecking=no $TEST_SERVER '
-                        curl http://localhost:5000
+                        curl -f http://localhost:5000
                     '
                 """
             }
         }
 
-        // ================= APPROVAL =================
+        // ===================== APPROVAL =====================
         stage('Approval') {
             steps {
                 input message: 'Deploy to Production?'
             }
         }
 
-        // ================= PROD =================
+        // ===================== DEPLOY PROD =====================
         stage('Deploy PROD') {
             steps {
                 sh """
