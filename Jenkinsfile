@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        SSH_KEY    = "/var/lib/jenkins/.ssh/id_ed25519"
-        DEV_SERVER = "ubuntu@54.169.253.29"
+        SSH_KEY     = "/var/lib/jenkins/.ssh/id_ed25519"
+        DEV_SERVER  = "ubuntu@54.169.253.29"
         TEST_SERVER = "ubuntu@54.169.253.29"
         PROD_SERVER = "ubuntu@52.221.234.94"
     }
@@ -41,6 +41,8 @@ pipeline {
 
                 pkill -f app.py || true
 
+                echo "ENV=DEV" > .env
+
                 python3 -m venv venv
                 . venv/bin/activate
 
@@ -49,7 +51,6 @@ pipeline {
                 nohup python3 app.py > app.log 2>&1 &
 
                 sleep 5
-
                 ps -ef | grep app.py
 EOF
                 """
@@ -71,6 +72,8 @@ EOF
 
                 pkill -f app.py || true
 
+                echo "ENV=TEST" > .env
+
                 python3 -m venv venv
                 . venv/bin/activate
 
@@ -79,7 +82,6 @@ EOF
                 nohup python3 app.py > app.log 2>&1 &
 
                 sleep 5
-
                 ps -ef | grep app.py
 EOF
                 """
@@ -101,6 +103,8 @@ EOF
 
                 pkill -f app.py || true
 
+                echo "ENV=PROD" > .env
+
                 python3 -m venv venv
                 . venv/bin/activate
 
@@ -109,7 +113,6 @@ EOF
                 nohup python3 app.py > app.log 2>&1 &
 
                 sleep 5
-
                 ps -ef | grep app.py
 EOF
                 """
