@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         SSH_KEY     = "/var/lib/jenkins/.ssh/id_ed25519"
-        DEV_SERVER  = "ubuntu@13.40.55.20"
-        TEST_SERVER = "ubuntu@13.40.26.34"
-        PROD_SERVER = "ubuntu@16.60.165.86"
+        DEV_SERVER  = "ubuntu@18.143.166.115"
+        TEST_SERVER = "ubuntu@47.129.151.38"
+        PROD_SERVER = "ubuntu@47.131.225.139"
     }
 
     stages {
